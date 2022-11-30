@@ -50,6 +50,7 @@ void QrDetectorNodelet::disconnectCallback()
 void QrDetectorNodelet::imageCallback(const sensor_msgs::ImageConstPtr &image)
 {
   cv_bridge::CvImageConstPtr cv_image;
+  std_msgs::String qr_msg;
 
   try {
     cv_image = cv_bridge::toCvShare(image, sensor_msgs::image_encodings::BGR8);
@@ -58,11 +59,12 @@ void QrDetectorNodelet::imageCallback(const sensor_msgs::ImageConstPtr &image)
     ROS_ERROR("cv_bridge exception: %s", e.what());
     return;
   }
-
+  
   auto tags = detector_.detect(cv_image->image, 10);
   for (auto& tag : tags)
   {
-    tags_publisher_.publish(tag.message);
+    qr_msg.data = tag.message;
+    tags_publisher_.publish(qr_msg);
   }
 }
 
